@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+    <title>投票系统</title>
+    <link rel='stylesheet' href='../css/weui.css' />
+    <link rel='stylesheet' href='../css/vote.css' />
+  </head>
+  <body>
+
+    <% if(err){ %>
+
+      <!-- 错误提示 -->
+      <div class="page msg_warn js_show">
+          <div class="weui-msg">
+              <div class="weui-msg__icon-area"><i class="weui-icon-warn weui-icon_msg"></i></div>
+              <div class="weui-msg__text-area">
+                  <h2 class="weui-msg__title">操作失败</h2>
+                  <p class="weui-msg__desc"><%= msg %></p>
+              </div>              
+          </div>
+      </div>
+
+    <% }else{ %>
+
+      <div class="page__bd">     
+
+        <h1 class='page-title'><%= voter.voter_name %></h1>
+        <p class='page-desc'><%= voter.voter_desc %></p>
+
+        <!-- 候选人简介 -->
+        <ul class="candidate-list">
+          <% for(var i=0; i<candidates.length; i++){ %>
+          <% var c = candidates[i] %> 
+          <li class="item">
+            <img src="../images/<%= c.candidate_image %>" alt=""/>
+            <hr>
+            <div class="text">
+              <p class='name'><%= c.candidate_name %></p>
+              <p class='intro'><%= c.candidate_desc %></p>
+            </div>
+          </li>
+          <% } %>
+        </ul>
+
+        <!-- 投票期限 -->
+        <% var disable = ''; %>
+        <% if(new Date(voter.voter_start_time.split('.')).getTime() > new Date().getTime()){ %>
+        <% disable = 'disabled'; %>
+          <a href="javascript:history.back();" class="weui-btn weui-btn_default">投票未开始</a>
+        <% }else if(new Date(voter.voter_end_time.split('.')).getTime() < new Date().getTime()){ %>
+        <% disable = 'disabled'; %>
+          <a href="javascript:history.back();" class="weui-btn weui-btn_default">投票已结束</a>
+        <% }else{ %>
+          <a href="javascript:history.back();" class="weui-btn weui-btn_default">投票结果</a>
+        <% } %>
+
+        <% if(list.length > 0){ %>
+
+          <!-- 投票结果 -->
+          <div class="weui-cells voted">
+            <% for(var i=0; i<list.length; i++){ %>
+            <% var c = list[i] %> 
+            
+              <label class="weui-cell"'>
+                  <div class="weui-cell__hd">
+                    <p class='name'><%= c.candidate_name %></p>                      
+                  </div>
+                  <div class="weui-cell__bd">
+                    
+                    <p class='count'><%= c["count(*)"] %>票</p>
+                  </div>
+              </label>
+            <% } %>
+          </div>
+
+        <% }else{ %>
+
+          <!-- 投票选项 -->
+          <div class="weui-cells weui-cells_checkbox checkbox-list">
+              <% for(var i=0; i<candidates.length; i++){ %>
+              <% var c = candidates[i] %> 
+              
+                <label class="weui-cell weui-check__label" for="c<%= i %>" data-id='<%= c.id %>'>
+                    <div class="weui-cell__hd">
+                        <% var id = c.id; %>
+                        <input type="checkbox" class="weui-check" id='c<%= i %>' data-id="<%= c.id %>" <%= disable %> name="candidate">
+                        <i class="weui-icon-checked"></i>
+                    </div>
+                    <div class="weui-cell__bd">
+                        <img src='../images/<%= c.candidate_image %>' alt='' />
+                        <p class='name'><%= c.candidate_name %></p>
+                    </div>
+                </label>
+              <% } %>
+          </div>
+
+        <% } %> 
+
+      </div>
+
+      <!-- toast -->
+      <div id="toast-10" style="opacity: 0; display: none;">
+          <div class="weui-mask_transparent"></div>
+          <div class="weui-toast">
+              <p class="weui-toast__content"></p>
+          </div>
+      </div>
+
+      <% if(list.length === 0){ %>
+        <!-- 投票按钮 -->
+        <div class="voter-wrap">
+          <a href="javascript:;" class="weui-btn weui-btn_primary" id='voter'>投票</a>
+        </div>
+      <% } %>
+
+    <% } %>    
+
+    <script src="../js/zepto.min.js"></script>
+    <script src="../js/cookie.min.js"></script>
+    <script src="../js/index.js"></script>
+  </body>
+</html>

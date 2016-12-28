@@ -1,0 +1,183 @@
+@charset "utf-8";
+
+html{
+  height:100%;
+  body{
+    height: 100%;
+  }
+}
+
+body{
+  margin: 0;
+  position: relative;
+}
+
+header{
+  width: 100%;
+  height: 80px;
+  background-color: #1B3160;
+  color: #C1D5EC;
+  padding:0 20px;
+  box-sizing: border-box;
+  float: left;
+
+  .logo{
+    float: left;
+    line-height: 80px;
+    font-size:20px;
+  }
+  .user{
+    float:right;
+    line-height: 80px;
+    font-size:16px;
+    a{
+      color: #C1D5EC;
+      text-decoration: none;
+    }
+  }
+}
+
+.get-user-modal{
+  img{
+    width: 50px;
+    height: 50px;
+    border-radius: 25px;
+  }
+}
+
+.get-candidate-modal{
+  img{
+    width: 50px;
+    height: 50px;
+    border-radius: 25px;
+  }
+  table{
+      .switch-status{
+        margin-left: 20px;        
+      }
+      tr{
+        td:nth-child(2){
+          width:50%;
+          p{
+            overflow: auto;
+            height: 50px;
+          }
+        }
+      }
+    }
+}
+
+.bd{
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  display: -ms-flexbox;
+  display: flex;
+  position: absolute;
+  top: 80px;
+  left:0;
+  .list{
+    width: 200px;
+    font-size: 0;
+    padding:0;
+    float: left;
+    border-right: 1px solid #ccc;
+    background-color: #E8E9EE;
+    height: 100%;
+    .item{
+      height: 40px;
+      line-height: 40px;
+      border-bottom: 1px solid #ccc;
+      text-align: center;
+      color: #000;
+      font-size: 16px;
+      list-style: none;
+      &.active{
+        background-color: #fff;
+      }
+    }
+  }
+  .content{
+    padding: 20px;
+    -ms-flex: 1;
+        flex: 1;
+    .panel{
+      display: none;
+      &.active{
+        display: block;
+      }
+    }
+
+    .add-voter-btn{
+      margin-bottom: 20px;
+    }
+
+    table{
+      .switch-status{
+        margin-left: 20px;
+        margin-right: 10px;
+      }
+      tr{
+        td:nth-child(4){
+          width:20%;
+          p{
+            overflow: auto;
+            height: 50px;
+          }
+        }
+      }
+    }
+
+    .voter-op{
+      display: none;
+    }
+
+    .candidate-op{
+      display: none;
+    }
+
+    .ranking-op{
+      display: none;
+    }
+
+    .user-op{
+      display: none;
+    }
+
+
+    &.add-voter{
+      .voter-op{
+        display: block;
+      }
+    }
+
+    &.add-candidate{
+
+      .candidate-op{
+        display: block;
+      }
+      .add-candidate-btn{
+        margin-right: 10px;
+      }
+      width: 100%;
+      
+    }
+
+    &.ranking{
+
+      .ranking-op{
+        display: block;
+      }
+    } 
+
+    &.import-user{
+      .user-op{
+        display: block;
+      }
+
+      .import-user-btn{
+        margin-right: 10px;
+      }
+    }   
+  }
+}

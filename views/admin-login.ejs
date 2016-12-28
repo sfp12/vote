@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>投票后台管理系统</title>
+    <link rel='stylesheet' href='../css/bootstrap.css' />
+    <link rel='stylesheet' href='../css/layer.css' />
+    <link rel='stylesheet' href='../css/admin-login.css' />
+</head>
+<body>
+  
+  <div class="box">
+      <div class="login-box">
+        <div class="login-title text-center">
+          <h1><small>登录</small></h1>
+        </div>
+        <div class="login-content ">
+        <div class="form">
+        <form action="#" method="post">
+          <div class="form-group">
+            <div class="col-xs-12  ">
+              <div class="input-group">
+                <span class="input-group-addon"><span class="glyphicon glyphicon-user"></span></span>
+                <input type="text" id="username" name="username" class="form-control" placeholder="用户名">
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-xs-12  ">
+              <div class="input-group">
+                <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
+                <input type="password" id="password" name="password" class="form-control" placeholder="密码">
+              </div>
+            </div>
+          </div>
+          <div class="form-group form-actions">
+            <div class="col-xs-4 col-xs-offset-4 ">
+              <button type="button" id='submit' class="btn btn-sm btn-info"><span class="glyphicon glyphicon-off"></span> 登录</button>
+            </div>
+          </div>
+        </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/jquery-2.1.4.js"></script>
+  <script src="../js/layer.js"></script>
+  <script>
+    $(function(){
+
+      $('#submit').on('click', function(e){
+        $.post('/login', {
+          username: $('#username').val(),
+          password: $('#password').val()
+        })
+        .done(function(data){
+          if(data.code === 0){
+            layer.msg(data.msg);
+            setTimeout(function(){
+              location.href = '/admin/index';
+            }, 3000);
+          }else{
+            layer.msg(data.msg);
+          }
+        })
+        .fail(function(data){
+          layer.msg('登录失败');
+        })
+      })
+
+    })
+  </script>
+</body>
+</html>

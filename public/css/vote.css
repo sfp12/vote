@@ -1,0 +1,89 @@
+/*  weui tabbar */
+body,
+html {
+  height: 100%;
+  background-color: #fff;
+  font-family: Tahoma,Arial,Roboto,"Droid Sans","Helvetica Neue","Droid Sans Fallback","Heiti SC",sans-self; }
+
+section {
+  overflow: hidden; }
+
+.page-title {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 400;
+  margin-top: 50px; }
+
+.page-desc {
+  margin-top: 5px;
+  color: #888;
+  text-align: left;
+  font-size: 14px;
+  width: 80%;
+  margin: 5px auto; }
+
+.weui-toast {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-align: center;
+  align-items: center;
+  -ms-flex-pack: center;
+  justify-content: center; }
+
+.candidate-list {
+  font-size: 0; }
+  .candidate-list .item {
+    border-width: 3px;
+    border-style: solid;
+    border-color: #d4d4d4;
+    border-radius: 5px;
+    padding: 10px;
+    box-sizing: border-box;
+    width: 90%;
+    margin: 0 auto;
+    margin-bottom: 20px; }
+    .candidate-list .item img {
+      margin: 0 auto;
+      display: block;
+      width: 100%; }
+    .candidate-list .item hr {
+      background-color: #a0a0a0;
+      margin-top: 20px;
+      margin-bottom: 20px; }
+    .candidate-list .item .text .name {
+      font-size: 20px;
+      text-align: center; }
+    .candidate-list .item .text .intro {
+      font-size: 16px;
+      color: #666666; }
+
+.checkbox-list .weui-cell__bd {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: start;
+  justify-content: flex-start;
+  -ms-flex-align: center;
+  align-items: center;
+  color: #666666; }
+  .checkbox-list .weui-cell__bd img {
+    width: 75px;
+    height: 75px;
+    margin-right: 20px; }
+
+.voted .weui-cell {
+  color: #666666;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: justify;
+  justify-content: space-between; }
+  .voted .weui-cell .weui-cell__bd {
+    -ms-flex: initial;
+    flex: initial; }
+
+.voter-wrap {
+  padding: 0 15px;
+  margin-top: 20px; }
+
+/* add candidate*/
+
+/*# sourceMappingURL=vote.css.map */
