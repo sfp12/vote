@@ -1,10 +1,13 @@
 var express = require('express');
 var router = express.Router();
+
 var multiparty = require('multiparty');
 var fs = require('fs');
 var util = require('util');
 var xlsx=require('node-xlsx');
 var _ = require('lodash');
+var crypto = require('crypto');
+var async = require('async');
 
 var Candidate = require('../bookshelf').Candidate;
 var Voted = require('../bookshelf').Voted;
@@ -12,6 +15,10 @@ var Users = require('../bookshelf').Users;
 var Voter = require('../bookshelf').Voter;
 
 var pool=require("../db").mysqlpool;
+
+var voter_m = require('../models/voter_m');
+var candidate_m = require('../models/candidate_m');
+var voted_m = require('../models/voted_m');
 
 router.use('/admin', function(req, res, next){
 
@@ -23,166 +30,211 @@ router.use('/admin', function(req, res, next){
 
 });
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
+router.get('/', function(req, res){
 
-  // 查询投票信息
-  // 查询候选人
-  // 查询是否投票
+  req.session.voter_id = 11;
 
-  var v_id = req.query.voter_id;
-  var u_id = req.query.user_id;
-  req.session.user_id = u_id;
-  req.session.voter_id = v_id;
+  var u_number = req.query.user_id;
+  // 是否为学生或教职工
+  var is_user = false;
 
-  if(!v_id || !u_id){
+  if(!u_number){
     res.render('index', {
       err: true,
       msg: '链接错误',
       voter: {},
       candidates: [],
-      list: []
+      list: [],
+      is_user: is_user
     });
     return;
-  }
+  }  
 
-  Voter.where('id', v_id).fetch().then(function(data){
+  // 是否在表中
+  Users.where({
+    'usernumber': u_number,
+    'voter': req.session.voter_id
+  }).fetch().then(function(data){
 
-    // 查到投票信息
     if(!data){
-      res.render('index', {
-        err: true,
-        msg: '没有该投票',
-        voter: {},
-        candidates: [],
-        list: []
-      })
-      return;
+      req.session.user_id = 'guest';
+    }else{
+      data = data.toJSON();
+      req.session.user_id = data.id;
+
+      // 验证 usernumber and code
+      var md5 = crypto.createHash('md5');
+      var code = md5.update(u_number+'20161229').digest('hex');
+      var password = code === req.query.code;
+      if(password){
+        is_user = true;
+      }
     }
 
-    var voter = data.toJSON();
-
-    if(voter.voter_status === 0){
-      res.render('index', {
-        err: true,
-        msg: '投票被停用',
-        voter: {},
-        candidates: {},
-        list: []
-      })
-      return;
-    }
-
-    Candidate.where('voter', req.session.voter_id).fetchAll().then(function(data){
-
-      // 查到投票信息
-      if(data.length === 0){
-        res.render('index', {
-          err: true,
-          msg: '未添加候选人',
-          voter: {},
-          candidates: [],
-          list: []
-        })
-        return;
-      }  
-
-      var candidates = data.toJSON();   
-
-      // 查询是否投票
-      new Voted({
-        'voter': req.session.voter_id,
-        'user_id': req.session.user_id
-      }).fetch().then(function(data){
-
-        if(!data){
-          res.render('index', {
-            err: false,
-            msg: '查询成功',
-            voter: voter,
-            candidates: candidates,
-            list: []
-          })
-          return;
-        }
-
-        pool.getConnection(function(err, conn) {
-          if(err){
-            console.log(err);
-            res.render('index', {
-              err: true,
-              msg: '查询投票结果失败',
-              voter: {},
-              candidates: {},
-              list: []
-            })
-            return;
-          }
-
-          // 查询投票结果
-          var sql = 'SELECT vote.voted.candidate_id, vote.candidate.candidate_name, count(*) FROM vote.candidate left join vote.voted on vote.voted.candidate_id = vote.candidate.id where vote.voted.voter = '+v_id+' group by vote.voted.candidate_id order by count(*) desc;';
-
-          conn.query(sql, function(err, result) {
-            if(err){
-              console.log(err);
-              res.render('index', {
-                err: true,
-                msg: '查询投票结果失败',
-                voter: {},
-                candidates: {},
-                list: []
-              })
-              return;
-            }
-
-            res.render('index', {
-              err: false,
-              msg: '查询成功',
-              voter: voter,
-              candidates: candidates,
-              list: result
-            })
-          });
-        });
-
-      // 查询是否投票失败 
-      }).catch(function(err){
-        res.render('index', {
-          err: true,
-          msg: '查询是否投票失败',
-          voter: {},
-          candidates: [],
-          list: []
-        })
-      })  
-
-    // 查询候选人失败
-    }).catch(function(err){
-    console.log(err);
-    res.render('index', {
-      err: true,
-      msg: '查找候选人失败',
-      voter: {},
-      candidates: {},
-      list: []
-    })
-  });
-    
-  // 投票查询 失败
+    req.session.is_user = is_user;
+    res.redirect('/vote');
   }).catch(function(err){
     console.log(err);
     res.render('index', {
       err: true,
-      msg: '查找失败',
+      msg: '学工号认证出错',
       voter: {},
       candidates: {},
-      list: []
+      list: [],
+      is_user: is_user
     })
-  })  
+  })    
+  
+
+})
+
+
+router.get('/vote', function(req, res, next) {
+
+  if(!req.session.user_id){
+    res.redirect('https://schedule.bnu.edu.cn/redirect/redirecturl/2');
+    return;
+  }  
+
+  async.parallel([
+    function(cb){
+
+        voter_m.getVoter(req, function(err, rs){
+          if(err){
+            cb(null, false);
+          }else{
+            cb(null, rs);
+          }
+        })
+        
+    },
+    function(cb){
+
+        candidate_m.getCandidate(req, function(err, rs){
+          if(err){
+            cb(null, false);
+          }else{
+            cb(null, rs);
+          }
+        })
+
+    },
+    function(cb){
+
+        voted_m.getVoted(req, function(err, rs){
+          if(err){
+            cb(null, false);
+          }else{
+            cb(null, rs);
+          }
+        })
+
+    },
+    function(cb){
+
+        voted_m.getVotedOne(req, function(err, rs){
+          if(err){
+            cb(null, false);
+          }else{
+            cb(null, rs);
+          }
+        })
+
+    }
+  ], function(err, results){
+      console.log('err:'+err);
+
+      if(!results){
+        res.render('index', {
+          err: true,
+          msg: '查询失败',
+          voter: {},
+          candidates: [],
+          list: [],
+          is_user: req.session.is_user
+        })
+        return;
+      }
+
+      var voter = results[0];
+      var candidates = results[1];
+      var list = results[2];
+      var list_one = results[3];
+
+      if(!voter){
+        res.render('index', {
+          err: true,
+          msg: '没有该投票',
+          voter: {},
+          candidates: [],
+          list: [],
+          is_user: req.session.is_user
+        })
+        return;
+      }
+
+      voter = voter.toJSON();
+
+      if(voter.voter_status === 0){
+        res.render('index', {
+          err: true,
+          msg: '投票被停用',
+          voter: {},
+          candidates: {},
+          list: [],
+          is_user: req.session.is_user
+        })
+        return;
+      }
+
+      if(!candidates){
+        console.log('没有候选人');
+        candidates = [];
+      }
+
+      candidates = candidates.toJSON();
+
+      if(!req.session.is_user){
+        res.render('index', {
+          err: false,
+          msg: '学工号错误',
+          voter: voter,
+          candidates: candidates,
+          list: [],
+          is_user: req.session.is_user
+        })
+        return;
+      }
+
+
+      if(!list_one){
+        req.session.voted = false;
+        res.render('index', {
+          err: false,
+          msg: '查询成功',
+          voter: voter,
+          candidates: candidates,
+          list: [],
+          is_user: req.session.is_user
+        });
+        return;
+      }else{
+        req.session.voted = true;
+      }
+
+      res.render('index', {
+        err: false,
+        msg: '查询成功',
+        voter: voter,
+        candidates: candidates,
+        list: list,
+        is_user: req.session.is_user
+      });
+
+  })
   
 });
 
-// FE start
 
 router.post('/vote', function(req, res, next){
 
@@ -191,6 +243,7 @@ router.post('/vote', function(req, res, next){
 
   var candidates_id =JSON.parse(req.body.candidates);
   var len = candidates_id.length;
+  req.session.candidates_id = candidates_id;
 
   if(len > 10){
     res.json({
@@ -198,66 +251,50 @@ router.post('/vote', function(req, res, next){
       msg: '投票总数大于10'
     });
     return;
-  }  
+  }
 
-  // 先判断 是否 已投票
-  Voted.where({
-    'user_id': req.session.user_id,
-    'voter': req.session.voter_id
-  }).fetch().then(function(data){
-
-    if(data){
-      res.json({
-        code:1,
-        msg: '不能重复投票'
-      });
-      return;
-    }
-
-    pool.getConnection(function(err, conn) {
-      if(err){
-        console.log(err);
-        res.send(JSON.stringify({
-            code: 1,
-            msg: '投票失败'
-          }));
-        return; 
-      }
-
-      var candidates_a = [];
-
-      _.each(candidates_id, function(d, i){
-        candidates_a.push([req.session.user_id, d+'', req.session.voter_id]);
-      })
-
-      // 检查有无重复
-      var sql = "INSERT INTO voted (user_id, candidate_id, voter) VALUES ?";
-
-      conn.query(sql, [candidates_a], function(err, result) {
-        if(err){
-          console.log(err);
-          res.json({
-            code: 1,
-            msg: '投票失败'
-          });
-          return;
-        }
-        res.json({
-          code: 1,
-          msg: '投票成功'
-        });
-      });
-    }); 
-
-  // 查询 是否 已投票 错误
-  }).catch(function(err){
-    console.log(err);
+  if(req.session.voted){
     res.json({
       code:1,
-      msg: '查询错误'
+      msg: '不能重复投票'
     });
     return;
-  })  
+  }  
+
+  async.waterfall([
+    function(cb){
+        voted_m.vote(req, function(err, rs){
+          if(err){
+            cb(null, false);
+          }else{
+            cb(null, true);
+          }
+        })
+    },
+    function(results, cb){
+
+        voted_m.getVoted(req, function(err, rs){
+          if(err){
+            cb(null, false);
+          }
+          res.json({
+            code: 0,
+            msg: '投票成功',
+            result: rs
+          })
+
+        })
+    }
+  ], function(err, result){
+      console.log('err:'+err);
+      console.log('value:'+value);
+      res.json({
+        code: 1,
+        msg: '投票失败'
+      })
+  })
+
+    
 
 })
 
@@ -335,7 +372,7 @@ router.post('/admin/addVoter', function(req, res, next){
     console.log(err);
     res.send({
       code: 1,
-      msg: '查询投票（是否成功）失败'
+      msg: '查询投票（是否重复）失败'
     });
   }); 
 
@@ -490,7 +527,7 @@ router.get('/admin/getRanking', function(req, res, next) {
         }));
         return;
       }
-      
+      conn.release();
       res.json({
         code: 0,
         result: result
@@ -510,7 +547,7 @@ router.post('/admin/uploadUser', function(req, res, next){
     }else{
       var input_file = files.file[0];
       var uploaded_path = input_file.path;
-      var v_id = fields.v_id;
+      var v_id = fields.v_id[0];
 
       
       var obj = xlsx.parse(uploaded_path);
@@ -518,8 +555,43 @@ router.post('/admin/uploadUser', function(req, res, next){
       // 二维数组
       var data = obj[0].data;
 
+      // 导入 候选人
+      // _.map(data, function(d, i){
+      //   return d.push(v_id, '');
+      // })
+
+      // pool.getConnection(function(err, conn) {
+      //   if(err){
+      //     console.log(err);
+      //     res.send(JSON.stringify({
+      //         code: 1,
+      //         msg: '导入投票者失败'
+      //       }));
+      //     return; 
+      //   }
+
+      //   // 检查有无重复
+      //   var sql = "INSERT INTO candidate (candidate_name, candidate_title, candidate_institution, candidate_course, candidate_desc, voter, candidate_image) VALUES ?";
+
+      //   conn.query(sql, [data], function(err, result) {
+      //     if(err){
+      //       console.log(err);
+      //       res.send(JSON.stringify({
+      //         code: 1,
+      //         msg: '导入投票者失败'
+      //       }));
+      //       return;
+      //     }
+      //     res.send(JSON.stringify({
+      //       code: 0,
+      //       msg: '导入投票者成功'
+      //     }));
+      //   });
+      // });    
+
+
       _.map(data, function(d, i){
-        return d.push(0, v_id, 1);
+        return d.push('', 0, v_id, 1);
       })
 
       pool.getConnection(function(err, conn) {
@@ -533,7 +605,7 @@ router.post('/admin/uploadUser', function(req, res, next){
         }
 
         // 检查有无重复
-        var sql = "INSERT INTO users (username, count, voter, role) VALUES ?";
+        var sql = "INSERT INTO users (username, usernumber, count, voter, role) VALUES ?";
 
         conn.query(sql, [data], function(err, result) {
           if(err){
@@ -544,6 +616,7 @@ router.post('/admin/uploadUser', function(req, res, next){
             }));
             return;
           }
+          conn.release();
           res.send(JSON.stringify({
             code: 0,
             msg: '导入投票者成功'

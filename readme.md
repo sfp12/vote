@@ -7,3 +7,5 @@ bookshelf跟node-mysql的结合使用
 weui
 
 错误处理：unix的理念，没有消息就是好消息
+
+可以用async来控制流程，一旦涉及到嵌套。

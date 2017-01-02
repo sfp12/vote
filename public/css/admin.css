@@ -38,9 +38,9 @@ header {
   border-radius: 25px; }
 .get-candidate-modal table .switch-status {
   margin-left: 20px; }
-.get-candidate-modal table tr td:nth-child(2) {
+.get-candidate-modal table tr td:nth-child(3) {
   width: 50%; }
-  .get-candidate-modal table tr td:nth-child(2) p {
+  .get-candidate-modal table tr td:nth-child(3) p {
     overflow: auto;
     height: 50px; }
 

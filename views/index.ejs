@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+    <meta name="format-detection" content="telephone=no" />
     <title>投票系统</title>
     <link rel='stylesheet' href='../css/weui.css' />
     <link rel='stylesheet' href='../css/vote.css' />
@@ -32,13 +33,28 @@
         <!-- 候选人简介 -->
         <ul class="candidate-list">
           <% for(var i=0; i<candidates.length; i++){ %>
-          <% var c = candidates[i] %> 
+          <% var c = candidates[i]; console.log %> 
           <li class="item">
-            <img src="../images/<%= c.candidate_image %>" alt=""/>
+            <img src="../images/<%= voter.id %>/<%= c.candidate_image %>" alt=""/>
             <hr>
             <div class="text">
               <p class='name'><%= c.candidate_name %></p>
-              <p class='intro'><%= c.candidate_desc %></p>
+              <div class='title-wrap title-1'>
+                <p class='title'>职称：</p>
+                <p class='title-content'><%= c.candidate_title%></p>
+              </div>
+              <div class='title-wrap title-2'>
+                <p class='title'>学术机构：</p>
+                <p class='title-content'><%= c.candidate_institution %></p>
+              </div>
+              <div class='title-wrap title-2'>
+                <p class='title'>开设的主要课程：</p>
+                <p class='title-content'><%= c.candidate_course %></p>
+              </div>
+              <div class='title-wrap title-2 desc'>
+                <p class='title'>参评陈述</p>
+                <p class='title-content'><%- c.candidate_desc %></p>
+              </div>
             </div>
           </li>
           <% } %>
@@ -53,7 +69,6 @@
         <% disable = 'disabled'; %>
           <a href="javascript:history.back();" class="weui-btn weui-btn_default">投票已结束</a>
         <% }else{ %>
-          <a href="javascript:history.back();" class="weui-btn weui-btn_default">投票结果</a>
         <% } %>
 
         <% if(list.length > 0){ %>
@@ -63,13 +78,13 @@
             <% for(var i=0; i<list.length; i++){ %>
             <% var c = list[i] %> 
             
-              <label class="weui-cell"'>
+              <label class="weui-cell">
                   <div class="weui-cell__hd">
                     <p class='name'><%= c.candidate_name %></p>                      
                   </div>
                   <div class="weui-cell__bd">
                     
-                    <p class='count'><%= c["count(*)"] %>票</p>
+                    <p class='count'><%= c["count(voted.candidate_id)"] %>票</p>
                   </div>
               </label>
             <% } %>
@@ -89,7 +104,7 @@
                         <i class="weui-icon-checked"></i>
                     </div>
                     <div class="weui-cell__bd">
-                        <img src='../images/<%= c.candidate_image %>' alt='' />
+                        <img src='../images/<%= voter.id %>/<%= c.candidate_image %>' alt='' />
                         <p class='name'><%= c.candidate_name %></p>
                     </div>
                 </label>
@@ -108,10 +123,12 @@
           </div>
       </div>
 
+      <input id='is_user' type='hidden' value='<%= is_user %>' >
+
       <% if(list.length === 0){ %>
         <!-- 投票按钮 -->
         <div class="voter-wrap">
-          <a href="javascript:;" class="weui-btn weui-btn_primary" id='voter'>投票</a>
+          <a href="javascript:;" class="weui-btn weui-btn_primary voter-btn" id='voter'>投票</a>
         </div>
       <% } %>
 

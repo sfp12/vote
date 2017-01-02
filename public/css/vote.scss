@@ -16,14 +16,16 @@ section{
   text-align: center;
   font-size: 20px;
   font-weight: 400;
-  margin-top: 50px;
+  max-width: 320px;
+  margin: 0 auto;
+  margin-top: 20px;
 }
 
 .page-desc{
   margin-top: 5px;
   color: #888;
   text-align: left;
-  font-size: 14px;
+  font-size: 18px;
   width: 80%;
   margin: 5px auto;
 }
@@ -39,17 +41,19 @@ section{
 
 .candidate-list{
   font-size: 0;
-
   .item{
     border-width: 3px;
     border-style: solid;
     border-color: rgb(212, 212, 212);
     border-radius: 5px;
-    padding: 10px;
     box-sizing: border-box;
     width: 90%;
     margin: 0 auto;
     margin-bottom: 20px;
+    border-radius: 15px;
+    border-width: 1px 3px 1px 1px;
+    border-style: solid;
+    box-shadow: rgb(170, 170, 170) 0px 0px 10px;
     img{
       margin: 0 auto;
       display: block;
@@ -61,16 +65,51 @@ section{
       margin-bottom: 20px;
     }
     .text{
+      padding-top: 10px;
       .name{
         font-size: 20px;
         text-align: center;
       }
-      .intro{
-        font-size: 16px;
-        color: rgb(102, 102, 102);
+      .title-wrap{
+        margin: 0 10px;
+        .title{
+          font-size: 18px;
+          color: black;
+        }
+        .title-content{
+          font-size: 16px;
+          color: rgb(102, 102, 102);
+        }
+      }
+      .title-1{
+        p{
+          display: inline-block;
+        }
+      }
+      .desc{
+        border: 2px solid olive;
+        padding: 10px;
+        border-radius: 15px;
+        position: relative;
+        margin: 0;
+        margin-top: 20px;
+        .title{
+          text-align: center;
+          position: absolute;
+          top: -16px;
+          left: 50%;
+          padding: 0 14px;
+          background-color: #fff;
+          margin-left: -50px;
+        }
+        .title-content{
+          text-indent: 2em;
+          span{
+            display: inline-block;
+          }
+        }
       }
     }
-
   }
 }
 
@@ -88,8 +127,7 @@ section{
       height: 75px;
       margin-right: 20px;
     }
-  }
-  
+  }  
 }
 
 .voted{
@@ -109,6 +147,7 @@ section{
 .voter-wrap{
   padding: 0 15px;
   margin-top: 20px;
+  padding-bottom: 20px;
 }
 /* add candidate*/
 

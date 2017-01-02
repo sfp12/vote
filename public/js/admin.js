@@ -240,7 +240,7 @@ $(function(){
             var item = data[i];
             var str = '<tr>';
             str += '<td>'+item.candidate_name+'</td>'
-            // str += '<td><img src="../images/'+item.candidate_image+'"></td>'
+            str += '<td><img src="../images/'+id+'/'+item.candidate_image+'"></td>'
             str += '<td><p>'+item.candidate_desc+'</p></td>'
             str += '</tr>';
             a.push(str);
