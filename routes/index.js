@@ -142,7 +142,6 @@ router.get('/vote', function(req, res, next) {
 
     }
   ], function(err, results){
-      console.log('err:'+err);
 
       if(!results){
         res.render('index', {
@@ -263,16 +262,42 @@ router.post('/vote', function(req, res, next){
 
   async.waterfall([
     function(cb){
-        voted_m.vote(req, function(err, rs){
-          if(err){
+        
+      voter_m.getVoter(req, function(err, rs){
+        if(err){
+          cb(null, false);
+        }else{
+
+          var voter = rs.toJSON();
+          if(new Date(voter.voter_start_time.split('.')).getTime() > new Date().getTime()){
             cb(null, false);
-          }else{
-            cb(null, true);
           }
-        })
+          if(new Date(voter.voter_end_time.split('.')).getTime() < new Date().getTime()){
+            cb(null, false);
+          }
+          cb(null, true);
+        }
+      })
+
     },
     function(results, cb){
 
+        if(results){
+          voted_m.vote(req, function(err, rs){
+            if(err){
+              cb(null, false);
+            }else{
+              cb(null, true);
+            }
+          })
+        }else{
+          cb(null, results);
+        }        
+
+    },
+    function(results, cb){
+
+      if(results){
         voted_m.getVoted(req, function(err, rs){
           if(err){
             cb(null, false);
@@ -282,8 +307,15 @@ router.post('/vote', function(req, res, next){
             msg: '投票成功',
             result: rs
           })
-
         })
+      }else{
+        res.json({
+          code: 1,
+          msg: '投票失败',
+          result: ''
+        })
+      }
+        
     }
   ], function(err, result){
       console.log('err:'+err);

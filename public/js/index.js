@@ -94,7 +94,7 @@ $(function(){
   var count = 0;  
 
   // checkbox
-   $('.weui-check__label').on('tap', function(e){
+   $('.weui-check').on('click', function(e){
 
     if(count === 10){
 
