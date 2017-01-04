@@ -5,7 +5,7 @@ var logger = require('morgan');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
-// var MongoStore = require('connect-mongo')(session);
+var MongoStore = require('connect-mongo')(session);
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -29,9 +29,9 @@ app.use(session({
   name: 'sid',
   secret:'voterbnu',
   cookie: { maxAge: 1000*60*60*10000 }
-  // store: new MongoStore({   
-  //        url: 'mongodb://localhost:27017/voter'      
-  //    })
+  store: new MongoStore({   
+         url: 'mongodb://localhost:27017/voter'      
+     })
 }));
  
 // app.use(session(sess));

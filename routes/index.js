@@ -272,7 +272,7 @@ router.post('/vote', function(req, res, next){
           if(new Date(voter.voter_start_time.split('.')).getTime() > new Date().getTime()){
             cb(null, false);
           }
-          if(new Date(voter.voter_end_time.split('.')).getTime() < new Date().getTime()){
+          if((new Date(voter.voter_end_time.split('.')).getTime()+24*60*60*1000) < new Date().getTime()){
             cb(null, false);
           }
           cb(null, true);

@@ -65,7 +65,7 @@
         <% if(new Date(voter.voter_start_time.split('.')).getTime() > new Date().getTime()){ %>
         <% disable = 'disabled'; %>
           <a href="javascript:history.back();" class="weui-btn weui-btn_default">投票未开始</a>
-        <% }else if(new Date(voter.voter_end_time.split('.')).getTime() < new Date().getTime()){ %>
+        <% }else if((new Date(voter.voter_end_time.split('.')).getTime()+24*60*60*1000) < new Date().getTime()){ %>
         <% disable = 'disabled'; %>
           <a href="javascript:history.back();" class="weui-btn weui-btn_default">投票已结束</a>
         <% }else{ %>
