@@ -8,7 +8,7 @@ var session = require('express-session');
 var MongoStore = require('connect-mongo')(session);
 
 var routes = require('./routes/index');
-var users = require('./routes/users');
+var admins = require('./routes/admins');
 
 var app = express();
 
@@ -28,7 +28,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
   name: 'sid',
   secret:'voterbnu',
-  cookie: { maxAge: 1000*60*60*10000 }
+  cookie: { maxAge: 1000*60*60*10000 },
   store: new MongoStore({   
          url: 'mongodb://localhost:27017/voter'      
      })
@@ -36,7 +36,7 @@ app.use(session({
  
 // app.use(session(sess));
 app.use('/', routes);
-app.use('/users', users);
+app.use('/admin', admins);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
